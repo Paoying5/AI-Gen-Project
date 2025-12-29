@@ -1,0 +1,195 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Overview | AirVision{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between md:items-end gap-4">
+        <div>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
+                Station Overview</h1>
+            <p class="text-gray-400 mt-1">Real-time air quality monitoring and AI-based forecasting.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden md:block">
+                <p class="text-xs text-gray-500">Last Synced</p>
+                <p class="text-sm font-mono text-emerald-400" id="last-update-time">--:--:--</p>
+            </div>
+            <button onclick="fetchData()"
+                class="glass-panel px-4 py-2 rounded-lg hover:bg-white/5 transition-colors text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                    </path>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Daily Briefing Card -->
+    <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 bg-emerald-500/5">
+        <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-widest mb-1">Daily Briefing</h3>
+        <p class="text-lg text-gray-200" id="daily-briefing">Loading AI insights...</p>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Risk KPI -->
+        <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+            <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+            </div>
+            <p class="text-sm text-gray-400">Current Risk</p>
+            <h3 class="text-3xl font-bold mt-1" id="kpi-risk">--</h3>
+            <div class="mt-2 text-xs flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full" id="risk-dot"></span>
+                <span class="text-gray-500">Based on PM2.5</span>
+            </div>
+        </div>
+
+        <!-- PM2.5 KPI -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <p class="text-sm text-gray-400">PM2.5 Concentration</p>
+            <div class="flex items-baseline gap-1 mt-1">
+                <h3 class="text-3xl font-bold" id="kpi-pm25">--</h3>
+                <span class="text-sm text-gray-500">µg/m³</span>
+            </div>
+            <p class="text-xs text-emerald-400 mt-2">Live Sensor Data</p>
+        </div>
+
+        <!-- Forecast KPI -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <p class="text-sm text-gray-400">24h Forecast (Avg)</p>
+            <div class="flex items-baseline gap-1 mt-1">
+                <h3 class="text-3xl font-bold" id="kpi-forecast">--</h3>
+                <span class="text-sm text-gray-500">µg/m³</span>
+            </div>
+            <p class="text-xs text-purple-400 mt-2">LSTM Model</p>
+        </div>
+
+        <!-- Accuracy KPI -->
+        <div class="glass-panel p-6 rounded-2xl">
+            <p class="text-sm text-gray-400">Model Reliability (MAPE)</p>
+            <div class="flex items-baseline gap-1 mt-1">
+                <h3 class="text-3xl font-bold" id="kpi-mape">--%</h3>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Last Validation</p>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Line Chart -->
+        <div class="glass-panel p-6 rounded-2xl lg:col-span-2 min-h-[400px]">
+            <h3 class="text-lg font-semibold mb-4">Forecast vs Actual Trend</h3>
+            <div id="main-chart" class="w-full h-[320px]"></div>
+        </div>
+
+        <!-- SHAP Image -->
+        <div class="glass-panel p-6 rounded-2xl flex flex-col">
+            <h3 class="text-lg font-semibold mb-4">Key Risk Drivers (SHAP)</h3>
+            <div class="flex-1 flex items-center justify-center bg-black/20 rounded-xl overflow-hidden group">
+                <img src="/static/plots/shap_summary.png"
+                    class="max-w-full max-h-[300px] object-contain transition-transform duration-500 group-hover:scale-105"
+                    alt="Run pipeline to see SHAP">
+            </div>
+            <div class="mt-4 text-xs text-center text-gray-400">
+                Top features influencing the Random Forest Risk Classifier
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function fetchData() {
+        // Mock loading state if needed
+        document.getElementById('last-update-time').innerText = new Date().toLocaleTimeString();
+
+        try {
+            const res = await fetch('/api/stats');
+            const data = await res.json();
+
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Update KPIs
+            const riskEl = document.getElementById('kpi-risk');
+            const dotEl = document.getElementById('risk-dot');
+
+            riskEl.innerText = data.current_risk;
+
+            // Color Logic
+            let color = 'bg-gray-400';
+            let textColor = 'text-white';
+
+            if (data.current_risk === 'Safe') { color = 'bg-emerald-500'; textColor = 'text-emerald-400'; }
+            else if (data.current_risk === 'Moderate') { color = 'bg-yellow-500'; textColor = 'text-yellow-400'; }
+            else { color = 'bg-rose-500'; textColor = 'text-rose-500'; }
+
+            riskEl.className = `text-3xl font-bold mt-1 ${textColor}`;
+            dotEl.className = `w-2 h-2 rounded-full ${color}`;
+
+            // Update Briefing
+            if (data.briefing) {
+                document.getElementById('daily-briefing').innerText = data.briefing;
+            }
+
+            document.getElementById('kpi-pm25').innerText = data.latest_pm25.toFixed(1);
+            document.getElementById('kpi-forecast').innerText = data.forecast_avg.toFixed(1);
+            document.getElementById('kpi-mape').innerText = data.mape.toFixed(1) + "%";
+
+            // Update Chart
+            const trace1 = {
+                x: data.history_dates,
+                y: data.history_values,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Actual',
+                line: { color: '#3b82f6', width: 2 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(59, 130, 246, 0.1)'
+            };
+            const trace2 = {
+                x: data.forecast_dates,
+                y: data.forecast_values,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'Forecast',
+                line: { color: '#a855f7', width: 2, dash: 'dot' }
+            };
+
+            const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#94a3b8' },
+                margin: { t: 20, r: 20, b: 40, l: 40 },
+                xaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.05)' },
+                yaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.05)' },
+                legend: { orientation: 'h', y: 1.1 },
+                hovermode: 'x unified'
+            };
+
+            Plotly.newPlot('main-chart', [trace1, trace2], layout, { responsive: true, displayModeBar: false });
+
+        } catch (e) {
+            console.error("Fetch Error:", e);
+        }
+    }
+
+    // Init
+    fetchData();
+    setInterval(fetchData, 30000); // Polling every 30s
+</script>
+{% endblock %}

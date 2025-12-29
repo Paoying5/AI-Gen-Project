@@ -1,0 +1,69 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Settings | AirVision{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8" x-data="{ notifications: true, autoRefresh: true }">
+
+    <h1 class="text-3xl font-bold text-white">System Settings</h1>
+
+    <!-- Panel 1: Thresholds -->
+    <div class="glass-panel p-8 rounded-2xl">
+        <h3 class="text-xl font-semibold mb-4 text-emerald-400">Risk Thresholds (PM2.5)</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <label class="text-sm text-gray-300">Safe Limit</label>
+                <input type="number" value="50"
+                    class="bg-white/5 border border-white/10 rounded px-3 py-1 text-white w-24">
+            </div>
+            <div class="flex items-center justify-between">
+                <label class="text-sm text-gray-300">Moderate Limit</label>
+                <input type="number" value="100"
+                    class="bg-white/5 border border-white/10 rounded px-3 py-1 text-white w-24">
+            </div>
+            <div class="flex items-center justify-between">
+                <label class="text-sm text-gray-300">Unhealthy Limit</label>
+                <input type="number" value="150"
+                    class="bg-white/5 border border-white/10 rounded px-3 py-1 text-white w-24">
+            </div>
+            <div class="pt-4 flex justify-end">
+                <button
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Save
+                    Thresholds</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel 2: Preferences -->
+    <div class="glass-panel p-8 rounded-2xl">
+        <h3 class="text-xl font-semibold mb-4 text-cyan-400">Preferences</h3>
+
+        <div class="flex items-center justify-between py-3 border-b border-white/5">
+            <div>
+                <p class="font-medium">Push Notifications</p>
+                <p class="text-xs text-gray-400">Receive alerts when air quality exceeds safe levels.</p>
+            </div>
+            <button @click="notifications = !notifications"
+                class="w-12 h-6 rounded-full relative transition-colors duration-300"
+                :class="notifications ? 'bg-emerald-500' : 'bg-gray-600'">
+                <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300"
+                    :class="notifications ? 'left-7' : 'left-1'"></div>
+            </button>
+        </div>
+
+        <div class="flex items-center justify-between py-3">
+            <div>
+                <p class="font-medium">Auto-Refresh Dashboard</p>
+                <p class="text-xs text-gray-400">Poll for new sensor data every 30 seconds.</p>
+            </div>
+            <button @click="autoRefresh = !autoRefresh"
+                class="w-12 h-6 rounded-full relative transition-colors duration-300"
+                :class="autoRefresh ? 'bg-emerald-500' : 'bg-gray-600'">
+                <div class="w-4 h-4 bg-white rounded-full absolute top-1 transition-transform duration-300"
+                    :class="autoRefresh ? 'left-7' : 'left-1'"></div>
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

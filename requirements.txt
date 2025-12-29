@@ -1,0 +1,12 @@
+numpy
+pandas
+pymongo
+flask
+scikit-learn
+statsmodels
+tensorflow
+matplotlib
+seaborn
+shap
+xgboost
+gunicorn

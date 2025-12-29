@@ -1,0 +1,88 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Sensors | AirVision{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+                Sensor Network</h1>
+            <p class="text-gray-400 mt-1">Status and telemetry from distributed IoT nodes.</p>
+        </div>
+        <button class="glass-panel px-4 py-2 rounded-lg text-sm hover:bg-white/10 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Network Active
+        </button>
+    </div>
+
+    <!-- Sensor Map Placeholder (Future) -->
+    <div
+        class="glass-panel p-1 rounded-2xl h-[300px] flex items-center justify-center bg-black/20 relative overflow-hidden group">
+        <div
+            class="absolute inset-0 opacity-30 bg-[url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Hanoi_location_map.svg/1024px-Hanoi_location_map.svg.png')] bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700">
+        </div>
+        <div class="z-10 text-center">
+            <h3 class="text-2xl font-bold text-white drop-shadow-lg">Geo-Spatial Overview</h3>
+            <p class="text-gray-200 drop-shadow-md">Active coverage: 100% (Hanoi Region)</p>
+        </div>
+    </div>
+
+    <!-- Sensors List -->
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-white/5 border-b border-white/10 text-gray-400 text-sm">
+                    <th class="p-6 font-medium">Station ID</th>
+                    <th class="p-6 font-medium">Location</th>
+                    <th class="p-6 font-medium">Status</th>
+                    <th class="p-6 font-medium">Latest PM2.5</th>
+                    <th class="p-6 font-medium">Uptime</th>
+                    <th class="p-6 font-medium text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm divide-y divide-white/5">
+                <!-- Station 1 -->
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="p-6 font-mono text-blue-400">ST-HAN-01</td>
+                    <td class="p-6 text-gray-300">Hoan Kiem District</td>
+                    <td class="p-6"><span
+                            class="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">Online</span></td>
+                    <td class="p-6 font-bold text-white">45.2</td>
+                    <td class="p-6 text-gray-400">99.9%</td>
+                    <td class="p-6 text-right">
+                        <button class="text-gray-400 hover:text-white group-hover:underline">Logs</button>
+                    </td>
+                </tr>
+                <!-- Station 2 -->
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="p-6 font-mono text-blue-400">ST-HAN-02</td>
+                    <td class="p-6 text-gray-300">Tay Ho District</td>
+                    <td class="p-6"><span
+                            class="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs">Online</span></td>
+                    <td class="p-6 font-bold text-white">38.1</td>
+                    <td class="p-6 text-gray-400">98.5%</td>
+                    <td class="p-6 text-right">
+                        <button class="text-gray-400 hover:text-white group-hover:underline">Logs</button>
+                    </td>
+                </tr>
+                <!-- Station 3 -->
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="p-6 font-mono text-blue-400">ST-HAN-03</td>
+                    <td class="p-6 text-gray-300">Cau Giay</td>
+                    <td class="p-6"><span
+                            class="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs">Maintenance</span>
+                    </td>
+                    <td class="p-6 font-bold text-gray-500">--</td>
+                    <td class="p-6 text-gray-400">85.0%</td>
+                    <td class="p-6 text-right">
+                        <button class="text-gray-400 hover:text-white group-hover:underline">Configs</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Analytics | AirVision{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="analyticsApp()">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-white">Historical Analytics</h1>
+
+        <!-- Controls -->
+        <div class="flex gap-2 bg-glass border border-glassBorder p-1 rounded-lg">
+            <button @click="period = '24h'; updateChart()"
+                class="px-3 py-1 text-xs font-medium rounded transition-colors"
+                :class="period === '24h' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'">24H</button>
+            <button @click="period = '7d'; updateChart()"
+                class="px-3 py-1 text-xs font-medium rounded transition-colors"
+                :class="period === '7d' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'">7D</button>
+            <button @click="period = '30d'; updateChart()"
+                class="px-3 py-1 text-xs font-medium rounded transition-colors"
+                :class="period === '30d' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'">30D</button>
+        </div>
+    </div>
+
+    <!-- Analytics Chart -->
+    <div class="glass-panel p-6 rounded-2xl min-h-[500px]">
+        <h3 class="text-lg font-semibold mb-2">Multivariate Analysis</h3>
+        <p class="text-xs text-gray-400 mb-6">Comparing PM2.5, PM10, NO2, and O3 trends over time.</p>
+        <div id="analytics-chart" class="w-full h-[400px]"></div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-panel p-6 rounded-2xl">
+            <h4 class="text-sm text-gray-400">Average PM2.5</h4>
+            <h2 class="text-2xl font-bold mt-1" x-text="stats.avg_pm25 || '--'"></h2>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl">
+            <h4 class="text-sm text-gray-400">Peak NOx</h4>
+            <h2 class="text-2xl font-bold mt-1" x-text="stats.max_no2 || '--'"></h2>
+        </div>
+        <div class="glass-panel p-6 rounded-2xl">
+            <h4 class="text-sm text-gray-400">Data Points Scanned</h4>
+            <h2 class="text-2xl font-bold mt-1" x-text="stats.count || '--'"></h2>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function analyticsApp() {
+        return {
+            period: '24h',
+            stats: {},
+            async init() {
+                this.updateChart();
+            },
+            async updateChart() {
+                try {
+                    // Call API with period param
+                    const res = await fetch(`/api/history?period=${this.period}`);
+                    const data = await res.json();
+
+                    if (data.error) return;
+
+                    this.stats = data.stats;
+
+                    // Plotly Multi-axis or stacked
+                    const traces = [
+                        { x: data.dates, y: data.pm25, name: 'PM2.5', type: 'scatter', line: { color: '#10b981' } },
+                        { x: data.dates, y: data.pm10, name: 'PM10', type: 'scatter', line: { color: '#3b82f6' } },
+                        { x: data.dates, y: data.no2, name: 'NO2', type: 'scatter', line: { color: '#f59e0b' } }
+                    ];
+
+                    const layout = {
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        font: { color: '#94a3b8' },
+                        margin: { t: 20, r: 20, b: 40, l: 40 },
+                        xaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.05)' },
+                        yaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.05)' },
+                        legend: { orientation: 'h', y: 1.1 }
+                    };
+
+                    Plotly.newPlot('analytics-chart', traces, layout, { responsive: true });
+
+                } catch (e) {
+                    console.error("Analytics Error", e);
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}
